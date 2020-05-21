@@ -1,9 +1,14 @@
   Current TODO:
-    code functionalities:
-      station, utility (dice rolling)
-      action: chance, community chest
-      property (super): street
-
+    add colour set functionality? add to spreadsheet, find data, double check existing
+    add tax, go functionality to Action: i.e. tax = -100, -200, go = 200
+    auction
+    houses
+    bankruptcy test
+    not enough money options
+    build houses + hotels wrt colour sets
+    sell houses + hotels wrt colour sets
+    mortgaging
+    action: chance, community chest
 Automated banking system? No need for Bank class
 No need for title deed cards, build directly into Property
 Property packs: change between Monopoly versions - may affect chance and community chest Cards

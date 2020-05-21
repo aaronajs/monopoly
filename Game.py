@@ -1,6 +1,6 @@
 import random
 from Player import Player
-from Property import Street, Station, Utility 
+from Property import Property, Street, Station, Utility 
 from BoardBuilder import BoardBuilder
 # controls the game, acts as the bank
 
@@ -20,24 +20,29 @@ class Game:
         if dice[0] == dice[1]: player.doublesRolled+=1
         if player.timeInJail == -1: # player not in jail
             if player.doublesRolled == 3: # got to jail for 3 doubles in a row
-                player.timeInJail = 0
-                player.position = 10
-                player.doublesRolled = 0
+                self.sendPlayerToJail(player)
+                print(player.token + " rolled 3 doubles, goes to jail")
             else: self.newPlayerPosition(player, moveSpaces)
         else: self.tryToLeaveJail(player, moveSpaces)
-        print(player)
+
+    def sendPlayerToJail(self, player):
+        player.timeInJail = 0
+        player.position = 10
+        player.doublesRolled = 0
     
     def tryToLeaveJail(self, player, moveSpaces):
-        if player.doublesRolled == 1: self.playerLeavesJail(player, moveSpaces)
+        if player.doublesRolled == 1: 
+            self.playerLeavesJail(player, moveSpaces)
+            print(player.token + "rolled a double")
         else: 
             player.timeInJail += 1
-            if player.timeInJail == 3: self.playerLeavesJail(player, moveSpaces, 50)
+            if player.timeInJail == 3: self.playerLeavesJail(player, moveSpaces, 50) # make sure player can pay 50
             else: # in jail for less than 3 turns; give options based on GOJF card
                 if player.getOutOfJailFreeCards > 0:
-                    query = "\n\'pay\' 50 or use GOJF \'card\', or \'continue\' later"
+                    query = "\'pay\' 50 or use GOJF \'card\', or \'continue\' later?"
                     options = ["continue", "pay", "card"]
                 else:
-                    query = "\n\'pay\' 50 or \'continue\' later"
+                    query = "\'pay\' 50 or \'continue\' later?"
                     options = ["continue", "pay"]
                 decision = player.makeDecision(query, options)
                 if decision == "pay": self.playerLeavesJail(player, moveSpaces, 50)
@@ -46,32 +51,63 @@ class Game:
     def playerLeavesJail(self, player, moveSpaces, fine=0):
         player.leaveJail(fine)
         self.newPlayerPosition(player, moveSpaces)
+        print(player.token + " leaves jail")
+
+    def playerNeedsMoney(self, player, owner):
+        if not player.properties:
+            player.isBankrupt(owner)
+            self.players.remove(player)
+            self.activePlayers -= 1
+            print(player.token + "is bankrupt!")
+        query = player.token + ": \'mortgage\', sell a\'property\', sell a \'house\' or declare \'bankrupt\'cy"
+        options = ["mortgage", "property", "house", "bankrupt"]
+        decision = player.makeDecision(query, options)
 
     # controls the outcome of where the player lands
     def newPlayerPosition(self, player, moveSpaces):
         newPosition = player.position + moveSpaces
         # jail, passing go
         if newPosition == 30: # player lands on go to jail, goes to jail, doesn't pass go/collects 200
-            player.timeInJail = 0
-            newPosition = 10
+            self.sendPlayerToJail(player)
+            print(player.token + " go to jail!")
         elif newPosition >=40: # player passes go
             newPosition -= 40
             player.money += 200
+            print(player.token + " passes go")
 
         player.position = newPosition # moves the player
-
         # taxes
-        if newPosition == 4: player.money -= 200 # player pays income tax
-        elif newPosition == 38: player.money -= 100 # player pays super tax
+        tax = 0
+        if newPosition == 4: tax = 200 # player pays income tax
+        elif newPosition == 38: tax = 100 # player pays super tax
+        if tax != 0 and player.canAfford(tax): player.money -= tax
+        else: self.playerNeedsMoney(player, None)
+        print(player)
 
         # rent (utilities, stations, properties)
-        #stations
         prop = board[newPosition]
-        if prop.owner == "Bank": # property is unowned: 
-            print("unowned")
-        if isinstance(prop, Station): print('')
-            
-
+        if isinstance(prop, Property):
+            owner = prop.owner
+            if owner is None: # property is unowned
+                # player can buy it, or get bank to auction property
+                decision = "auction"
+                if player.canAfford(prop.value):
+                    query = player.token + ": \'buy\' or \'auction\' " + prop.name + "?"
+                    options = ["buy", "auction"]
+                    decision = player.makeDecision(query, options)
+                if decision == "buy": player.buyProperty(prop)
+                else: print(player.token + " can't afford " + prop.name) # auction by default
+            else: # property is owned by a player
+                print("owned by", owner.token)
+                if owner is not player and not prop.isMortgaged:
+                    if isinstance(prop, Station): rentOwed = prop.rent * 2^(owner.stationsOwned - 1) 
+                    elif isinstance(prop, Utility): rentOwed = moveSpaces * 3^(owner.utilitiesOwned + 1) 
+                    elif isinstance(prop, Street): rentOwed = prop.rent[prop.numberOfHouses] 
+                    if player.canAfford(rentOwed): # player can afford rent
+                        player.money -= rentOwed
+                        owner.money += rentOwed
+                    else: self.playerNeedsMoney(player, owner)
+                        
 
     def printBoard(self):
         rows = [list(range(11))] # go -> jail

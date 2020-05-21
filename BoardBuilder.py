@@ -12,6 +12,8 @@ class BoardBuilder:
             next(readCSV)
             for row in readCSV:
                 position = int(row[0])
+                # add type to CSV files, make switch case to organise board
+                row[2:] = [0 if attribute == '' else int(attribute) for attribute in row[2:]]
                 if position %5 ==0: board[position] = Station(*row[1:4], 25)
                 elif position == 12 or position == 28: board[position] = Utility(*row[1:4], 0)
                 else: board[position] = Street(*row[1:])
