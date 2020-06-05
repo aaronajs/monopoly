@@ -15,16 +15,21 @@ class Property:
     
 class Street(Property):
 
-    def __init__(self, name, value, mortgage, rent, one, two, three, four, hotel):
+    colourSets = {} # colour:[properties]
+
+    def __init__(self, name, value, mortgage, rent, one, two, three, four, hotel, colour):
         Property.__init__(self, name, value, mortgage) # rent based on housing
         self.rent = [rent, one, two, three, four, hotel]
         self.numberOfHouses = 0 # 5 = hotel
-
+        self.colour = colour
+        self.colourSetOwned = False
+        if colour in Street.colourSets: Street.colourSets[colour].append(self)
+        else: Street.colourSets[colour] = [self]
 
 # could combine into other, add type param?
 class Utility(Property):
 
-    def __init__(self, name, value, mortgage, rent):
+    def __init__(self, name, value, mortgage):
         Property.__init__(self, name, value, mortgage)
 
 class Station(Property):

@@ -1,32 +1,3 @@
-Current TODO:
-    add colour set functionality? add to spreadsheet, find data, double check existing
-    add tax, go functionality to Action: i.e. tax = -100, -200, go = 200
-    auction
-    houses
-    bankruptcy test
-    GOJF cards
-    not enough money options
-    build houses + hotels wrt colour sets
-    sell houses + hotels wrt colour sets
-    mortgaging
-    action: chance, community chest
-
-Done:
-    players, player turns
-    dice
-    properties: streets, stations, utilities
-    in built bank
-    buying properties
-    jail, go to jail rolling doubles, 3x doubles, leaving jail (fine, double)
-    highest roll starts
-    pass go (collect 200)
-    land on taxes, pay
-    can afford, else (raise money in todo)
-    read csv for board data and build board
-
-    
-
-Automated banking system? No need for Bank class
 No need for title deed cards, build directly into Property
 Property packs: change between Monopoly versions - may affect chance and community chest Cards
 

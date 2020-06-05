@@ -6,23 +6,17 @@ class BoardBuilder:
 
     def build(self, version):
         board = [None]*40
-        with open('boards/'+version+'.csv') as propertyFile:
-            # position, property(name), value, mortgage, rent, 1H, 2Hs, 3Hs, 4Hs, Hotel
+        with open('boards/'+version+'x.csv') as propertyFile:
+            # position, type, name, value, mortgage, rent, 1H, 2Hs, 3Hs, 4Hs, hotel, colour
             readCSV = csv.reader(propertyFile, delimiter=',')
             next(readCSV)
             for row in readCSV:
                 position = int(row[0])
-                # add type to CSV files, make switch case to organise board
-                row[2:] = [0 if attribute == '' else int(attribute) for attribute in row[2:]]
-                if position %5 ==0: board[position] = Station(*row[1:4], 25)
-                elif position == 12 or position == 28: board[position] = Utility(*row[1:4], 0)
-                else: board[position] = Street(*row[1:])
-            board[0] = NonProperty("GO!")
-            board[10] = NonProperty("Jail")
-            board[20] = NonProperty("Free Parking")
-            board[30] = NonProperty("Go To Jail!")
-            board[4] = NonProperty("Income Tax")
-            board[38] = NonProperty("Super Tax")
-            for pos in [2, 17, 33]: board[pos] = Card("Community Chest")
-            for pos in [7, 22, 36]: board[pos] = Card("Chance")
+                squareType = row[1]
+                row[3:-1] = [0 if attribute == '' else int(attribute) for attribute in row[3:-1]]
+                if squareType == "Street": board[position] = Street(*row[2:])
+                elif squareType == "Station": board[position] = Station(*row[2:6])
+                elif squareType == "Utility": board[position] = Utility(*row[2:5])
+                elif squareType == "Card": board[position] = Card(row[2])
+                else: board[position] = NonProperty(row[2])
         return board

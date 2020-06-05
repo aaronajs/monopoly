@@ -31,6 +31,22 @@ class Player:
         prop.owner = self
         self.properties.append(prop)
 
+    def sellProperty(self, prop, other, price):
+        self.properties.remove(prop)
+        other.properties.append(prop)
+        self.money += price
+        other.money -= price
+
+    def mortgageProperty(self, index):
+        prop = self.properties[index]
+        prop.isMortgaged = True
+        self.money += prop.mortgage
+
+    def unmortgageProperty(self, index):
+        prop = self.properties[index]
+        prop.isMortgaged = True
+        self.money -= prop.mortgage * 1.1 # 10% extra
+
     def canAfford(self, payment): return self.money - payment >= 0
 
     def isBankrupt(self, other):
@@ -59,9 +75,17 @@ class Player:
                 else: continue
             except: print("error")
         return decision
-        # return "continue"
+    
+    def choosePrice(self):
+        while True:
+            try:
+                price = input(query + " ")
+                if isinstance(price, int): break
+                else: continue
+            except: print("error")
+        return price
 
     def __str__(self): 
         position = str(Player.board[self.position])
         if self.position == 10 and self.timeInJail == -1: position += " (visiting)"
-        return self.token + " " + str(self.money) + " " + position
+        return self.token + " " + str(self.money) + " " + position + "(" + str(self.position) + ")"
