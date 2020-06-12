@@ -32,8 +32,14 @@ class Player:
         self.properties.append(prop)
         if isinstance(prop, Station): self.stationsOwned += 1
         if isinstance(prop, Utility): self.utilitiesOwned += 1
+        # check if colour set
+        if isinstance(prop, Street):
+            colourSet = Street.colourSets[prop.colour]
+            if all(street.owner == self for street in colourSet):
+                for street in colourSet: street.colourSetOwned = True
+                print(self.token + " owns the colour set " + prop.colour)
 
-    def sellProperty(self, prop, other, price):
+    def sellProperty(self, prop, other, price): #TODO: check if removing a property from colour set
         self.properties.remove(prop)
         other.properties.append(prop)
         self.money += price
@@ -52,6 +58,14 @@ class Player:
     def unmortgageProperty(self, prop):
         prop.isMortgaged = True
         self.money -= prop.mortgage * 1.1 # 10% extra
+
+    def buyHouse(self, street):
+        street.numberOfHouses += 1
+        self.money -= street.houseCost
+
+    def sellHouse(self, street):
+        street.numberOfHouses -= 1
+        self.money += street.houseCost*0.5
 
     # return unmortgaged properties that aren't street, or if they are a street, they have no houses
     def getUnmortgagedProperties(self): return list(filter(lambda prop: (prop.isMortgaged == False and (not isinstance(prop, Street) or (isinstance(prop, Street) and prop.numberOfHouses == 0))), self.properties))

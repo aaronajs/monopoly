@@ -68,6 +68,34 @@ class Game:
                     if player in self.players: self.playerLeavesJail(player, moveSpaces, 50)
                 elif decision == "j": self.playerLeavesJail(player, moveSpaces)
 
+    def playerBuysHouse(self, player): # add buy at colour set level
+        buildableStreets = [prop for prop in player.properties if isinstance(prop, Street) and prop.colourSetOwned and prop.numberOfHouses < 5 and all(prop.numberOfHouses <= street.numberOfHouses for street in Street.colourSets[prop.colour])]
+        options = [str(index) for index in range(len(buildableStreets))]
+        if options:
+            for index in options:
+                prop = buildableStreets[int(index)]
+                print(index + ": " + str(prop) + "," + str(prop.houseCost))
+            query = "Which property do you want to build a house on?"
+            decision = player.makeDecision(query, options)
+            street = buildableStreets[int(decision)]
+            while player in self.players and not player.canAfford(street.houseCost): 
+                self.playerNeedsMoney(player)
+            player.buyHouse(street)
+        else: print("there are no properties " + player.token + " can build houses on")
+
+    def playerSellsHouse(self, player): # add sell at colour set level
+        streetsWithBuildings = [prop for prop in player.properties if isinstance(prop, Street) and prop.numberOfHouses > 0 and all(prop.numberOfHouses >= street.numberOfHouses for street in Street.colourSets[prop.colour])] 
+        options = [str(index) for index in range(len(streetsWithBuildings))]
+        if options:
+            for index in options:
+                prop = streetsWithBuildings[int(index)]
+                print(index + ": " + str(prop) + "," + str(prop.houseCost*0.5))
+            query = "From which property do you want to sell a house?"
+            decision = player.makeDecision(query, options)
+            street = streetsWithBuildings[int(decision)]
+            player.sellHouse(street)
+        else: print("there are no properties " + player.token + " can build houses on")
+
     def playerLeavesJail(self, player, moveSpaces, fine=0):
         player.leaveJail(fine)
         self.newPlayerPosition(player, moveSpaces)
@@ -122,7 +150,6 @@ class Game:
             for index in options: print(str(index) + ": " + str(buyers[int(index)]))
             # options = [buyer.token for buyer in self.players if buyer != player]
             query = "Sell property to another player: (enter number)" # + str(options)
-            # BUG: why does it need ''? ----- only works with Python 3
             decision = buyers[int(player.makeDecision(query, options))]
             # TODO: players must agree on a price before the transaction goes through
             # for now leave as agree outside game
@@ -171,12 +198,6 @@ class Game:
                             self.playerNeedsMoney(player)
                         if player in self.players:
                             player.buyProperty(prop)
-                            # check if colour set
-                            if isinstance(prop, Street):
-                                colourSet = Street.colourSets[prop.colour]
-                                if all(street.owner == player for street in colourSet):
-                                    for street in colourSet: street.colourSetOwned = True
-                                    print(player.token + " owns the colour set " + prop.colour)
 
                     else: print(player.token + " can't afford " + prop.name) # TODO: auction by default
                 

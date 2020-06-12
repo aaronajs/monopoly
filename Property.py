@@ -15,12 +15,13 @@ class Property:
     
 class Street(Property):
 
-    colourSets = {} # colour:[properties]
+    colourSets = {} # colour:[Street]
 
-    def __init__(self, name, value, mortgage, rent, one, two, three, four, hotel, colour):
+    def __init__(self, name, value, mortgage, rent, one, two, three, four, hotel, houseCost, colour):
         Property.__init__(self, name, value, mortgage) # rent based on housing
         self.rent = [rent, one, two, three, four, hotel]
         self.numberOfHouses = 0 # 5 = hotel
+        self.houseCost = houseCost
         self.colour = colour
         self.colourSetOwned = False
         if colour in Street.colourSets: Street.colourSets[colour].append(self)

@@ -6,8 +6,8 @@ class BoardBuilder:
 
     def build(self, version):
         board = [NonProperty("GO!")] + [None]*39
-        with open('boards/'+version+'x.csv') as propertyFile:
-            # position, type, name, value, mortgage, rent, 1H, 2Hs, 3Hs, 4Hs, hotel, colour
+        with open('boards/'+version+'.csv') as propertyFile:
+            # position, type, name, value, mortgage, rent, 1H, 2Hs, 3Hs, 4Hs, hotel, house cost, colour
             readCSV = csv.reader(propertyFile, delimiter=',')
             next(readCSV)
             for row in readCSV:

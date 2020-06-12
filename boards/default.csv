@@ -1,29 +1,40 @@
-Position,Property,Value,Mortgage,Rent,1 House,2 Houses,3 Houses,4 Houses,Hotel
-1,Old Kent Road,60,30,2,10,30,90,160,250
-3,Whitechapel Road,60,30,4,20,60,180,320,450
-5,Kings Cross Station,200,100,,,,,,
-6,The Angel Islington,100,50,6,30,90,270,400,550
-8,Euston Road,100,50,6,30,90,270,400,550
-9,Pentonville Road,120,60,8,40,100,300,450,600
-11,Pall Mall,140,70,10,50,150,450,625,750
-12,Electric Company,150,75,,,,,,
-13,Whitehall,140,70,10,50,150,450,625,750
-14,Northumberland Avenue,160,80,12,60,180,500,700,900
-15,Marylebone Station,200,100,,,,,,
-16,Bow Street,180,90,14,70,200,550,750,950
-18,Marlborough Street,180,90,14,70,200,550,750,950
-19,Vine Street,200,100,16,80,220,600,800,1000
-21,The Strand,220,110,18,90,250,700,875,1050
-23,Fleet Street,220,110,18,90,250,700,875,1050
-24,Trafalgar Square,240,120,20,100,300,750,925,1100
-25,Fenchurch St Station,200,100,,,,,,
-26,Leicester Square,260,130,22,110,330,800,975,1150
-27,Coventry Street,260,130,22,110,330,800,975,1150
-28,Water Works,150,75,,,,,,
-29,Piccadilly,280,140,22,120,360,850,1025,1200
-31,Regent Street,300,150,26,130,390,900,1100,1275
-32,Oxford Street,300,150,26,130,390,900,1100,1275
-34,Bond Street,320,160,28,150,450,1000,1200,1400
-35,Liverpool Street Station,200,100,,,,,,
-37,Park Lane,350,175,35,175,500,1100,1300,1500
-39,Mayfair,400,200,50,200,600,1400,1700,2000
+Position,Type,Name,Value,Mortgage,Rent,1 House,2 Houses,3 Houses,4 Houses,Hotel,House Cost,Colour
+1,Street,Old Kent Road,60,30,2,10,30,90,160,250,50,Brown
+2,Card,Community Chest,,,,,,,,,,
+3,Street,Whitechapel Road,60,30,4,20,60,180,320,450,50,Brown
+4,Tax,Income Tax,200,,,,,,,,,
+5,Station,Kings Cross Station,200,100,25,,,,,,,
+6,Street,The Angel Islington,100,50,6,30,90,270,400,550,50,Light Blue
+7,Card,Chance,,,,,,,,,,
+8,Street,Euston Road,100,50,6,30,90,270,400,550,50,Light Blue
+9,Street,Pentonville Road,120,60,8,40,100,300,450,600,50,Light Blue
+10,Action,Jail,,,,,,,,,,
+11,Street,Pall Mall,140,70,10,50,150,450,625,750,100,Pink
+12,Utility,Electric Company,150,75,,,,,,,,
+13,Street,Whitehall,140,70,10,50,150,450,625,750,100,Pink
+14,Street,Northumberland Avenue,160,80,12,60,180,500,700,900,100,Pink
+15,Station,Marylebone Station,200,100,25,,,,,,,
+16,Street,Bow Street,180,90,14,70,200,550,750,950,100,Orange
+17,Card,Community Chest,,,,,,,,,,
+18,Street,Marlborough Street,180,90,14,70,200,550,750,950,100,Orange
+19,Street,Vine Street,200,100,16,80,220,600,800,1000,100,Orange
+20,Action,Free Parking,,,,,,,,,,
+21,Street,The Strand,220,110,18,90,250,700,875,1050,150,Red
+22,Card,Chance,,,,,,,,,,
+23,Street,Fleet Street,220,110,18,90,250,700,875,1050,150,Red
+24,Street,Trafalgar Square,240,120,20,100,300,750,925,1100,150,Red
+25,Station,Fenchurch St Station,200,100,25,,,,,,,
+26,Street,Leicester Square,260,130,22,110,330,800,975,1150,150,Yellow
+27,Street,Coventry Street,260,130,22,110,330,800,975,1150,150,Yellow
+28,Utility,Water Works,150,75,,,,,,,,
+29,Street,Piccadilly,280,140,24,120,360,850,1025,1200,150,Yellow
+30,Action,Go To Jail,,,,,,,,,,
+31,Street,Regent Street,300,150,26,130,390,900,1100,1275,200,Green
+32,Street,Oxford Street,300,150,26,130,390,900,1100,1275,200,Green
+33,Card,Community Chest,,,,,,,,,,
+34,Street,Bond Street,320,160,28,150,450,1000,1200,1400,200,Green
+35,Station,Liverpool Street Station,200,100,25,,,,,,,
+36,Card,Chance,,,,,,,,,,
+37,Street,Park Lane,350,175,35,175,500,1100,1300,1500,200,Dark Blue
+38,Tax,Super Tax,100,,,,,,,,,
+39,Street,Mayfair,400,200,50,200,600,1400,1700,2000,200,Dark Blue
