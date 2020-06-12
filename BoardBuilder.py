@@ -5,7 +5,7 @@ from Action import NonProperty, Card
 class BoardBuilder:
 
     def build(self, version):
-        board = [None]*40
+        board = [NonProperty("GO!")] + [None]*39
         with open('boards/'+version+'x.csv') as propertyFile:
             # position, type, name, value, mortgage, rent, 1H, 2Hs, 3Hs, 4Hs, hotel, colour
             readCSV = csv.reader(propertyFile, delimiter=',')

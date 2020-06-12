@@ -3,7 +3,7 @@ Position,Type,Name,Value,Mortgage,Rent,1 House,2 Houses,3 Houses,4 Houses,Hotel,
 2,Card,Community Chest,,,,,,,,,
 3,Street,Whitechapel Road,60,30,4,20,60,180,320,450,Brown
 4,Tax,Income Tax,200,,,,,,,,
-5,Station,Kings Cross Station,200,100,,,,,,,
+5,Station,Kings Cross Station,200,100,25,,,,,,
 6,Street,The Angel Islington,100,50,6,30,90,270,400,550,Light Blue
 7,Card,Chance,,,,,,,,,
 8,Street,Euston Road,100,50,6,30,90,270,400,550,Light Blue
@@ -13,7 +13,7 @@ Position,Type,Name,Value,Mortgage,Rent,1 House,2 Houses,3 Houses,4 Houses,Hotel,
 12,Utility,Electric Company,150,75,,,,,,,
 13,Street,Whitehall,140,70,10,50,150,450,625,750,Pink
 14,Street,Northumberland Avenue,160,80,12,60,180,500,700,900,Pink
-15,Station,Marylebone Station,200,100,,,,,,,
+15,Station,Marylebone Station,200,100,25,,,,,,
 16,Street,Bow Street,180,90,14,70,200,550,750,950,Orange
 17,Card,Community Chest,,,,,,,,,
 18,Street,Marlborough Street,180,90,14,70,200,550,750,950,Orange
@@ -23,7 +23,7 @@ Position,Type,Name,Value,Mortgage,Rent,1 House,2 Houses,3 Houses,4 Houses,Hotel,
 22,Card,Chance,,,,,,,,,
 23,Street,Fleet Street,220,110,18,90,250,700,875,1050,Red
 24,Street,Trafalgar Square,240,120,20,100,300,750,925,1100,Red
-25,Station,Fenchurch St Station,200,100,,,,,,,
+25,Station,Fenchurch St Station,200,100,25,,,,,,
 26,Street,Leicester Square,260,130,22,110,330,800,975,1150,Yellow
 27,Street,Coventry Street,260,130,22,110,330,800,975,1150,Yellow
 28,Utility,Water Works,150,75,,,,,,,
@@ -33,7 +33,7 @@ Position,Type,Name,Value,Mortgage,Rent,1 House,2 Houses,3 Houses,4 Houses,Hotel,
 32,Street,Oxford Street,300,150,26,130,390,900,1100,1275,Green
 33,Card,Community Chest,,,,,,,,,
 34,Street,Bond Street,320,160,28,150,450,1000,1200,1400,Green
-35,Station,Liverpool Street Station,200,100,,,,,,,
+35,Station,Liverpool Street Station,200,100,25,,,,,,
 36,Card,Chance,,,,,,,,,
 37,Street,Park Lane,350,175,35,175,500,1100,1300,1500,Dark Blue
 38,Tax,Super Tax,100,,,,,,,,

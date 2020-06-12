@@ -1,5 +1,5 @@
 # represents a player of the game
-
+from Property import Street, Utility, Station
 class Player:
 
     board = []
@@ -17,9 +17,9 @@ class Player:
 
     def takeTurn(self, movePlayer):
         # decision = self.makeDecision("what to do? ", ["roll", "build", "sell", "offer"])
-        # opportunity to do other stuff
+        # TODO: opportunity to do other stuff
         movePlayer(self) # ready to roll dice and move
-        # (add functionality to do other stuff afterwards too until end turn)
+        # TODO: (add functionality to do other stuff afterwards too until end turn)
 
     def leaveJail(self, fine):
         self.doublesRolled = 0
@@ -30,26 +30,37 @@ class Player:
         self.money -= prop.value
         prop.owner = self
         self.properties.append(prop)
+        if isinstance(prop, Station): self.stationsOwned += 1
+        if isinstance(prop, Utility): self.utilitiesOwned += 1
 
     def sellProperty(self, prop, other, price):
         self.properties.remove(prop)
         other.properties.append(prop)
         self.money += price
         other.money -= price
+        if isinstance(prop, Station): 
+            self.stationsOwned -= 1
+            other.stationsOwned += 1
+        if isinstance(prop, Utility): 
+            self.utilitiesOwned -= 1
+            other.utilitiesOwned += 1
 
-    def mortgageProperty(self, index):
-        prop = self.properties[index]
+    def mortgageProperty(self, prop):
         prop.isMortgaged = True
         self.money += prop.mortgage
 
-    def unmortgageProperty(self, index):
-        prop = self.properties[index]
+    def unmortgageProperty(self, prop):
         prop.isMortgaged = True
         self.money -= prop.mortgage * 1.1 # 10% extra
 
+    # return unmortgaged properties that aren't street, or if they are a street, they have no houses
+    def getUnmortgagedProperties(self): return list(filter(lambda prop: (prop.isMortgaged == False and (not isinstance(prop, Street) or (isinstance(prop, Street) and prop.numberOfHouses == 0))), self.properties))
+
+    def getPropertiesWithHouses(self): return list(filter(lambda prop: (isinstance(prop, Street) and prop.numberOfHouses != 0), self.properties))
+
     def canAfford(self, payment): return self.money - payment >= 0
 
-    def isBankrupt(self, other):
+    def isBankrupt(self, other=None):
         # sell all houses and hotels at half price
         if other != None:
             other.getOutOfJailFreeCards += self.getOutOfJailFreeCards
@@ -67,21 +78,25 @@ class Player:
         self.properties = []
         self.position = 0
 
-    def makeDecision(self, query, options):
-        while True:
+    def makeDecision(self, query, options): # move to controller file
+        x = True
+        while x:
             try:
                 decision = input(query + " ")
-                if str.lower(decision) in options: break
+                if str.lower(str(decision)) == "exit": x = False; break
+                if str.lower(str(decision)) in options: break
                 else: continue
             except: print("error")
+        if x == False: exit()
         return decision
     
-    def choosePrice(self):
+    # TODO: simplify
+    def choosePrice(self, query): # move to controller file
         while True:
+            price = input(query + " ")
             try:
-                price = input(query + " ")
-                if isinstance(price, int): break
-                else: continue
+                price = int(price)
+                break
             except: print("error")
         return price
 
