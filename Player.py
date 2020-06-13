@@ -15,11 +15,11 @@ class Player:
         self.doublesRolled = 0 # to track 3 doubles in a row
         self.position = 0
 
-    def takeTurn(self, movePlayer):
-        # decision = self.makeDecision("what to do? ", ["roll", "build", "sell", "offer"])
-        # TODO: opportunity to do other stuff
-        movePlayer(self) # ready to roll dice and move
-        # TODO: (add functionality to do other stuff afterwards too until end turn)
+    # def takeTurn(self, movePlayer):
+    #     # decision = self.makeDecision("what to do? ", ["roll", "build", "sell", "offer"])
+    #     # TODO: opportunity to do other stuff
+    #     movePlayer(self) # ready to roll dice and move
+    #     # TODO: (add functionality to do other stuff afterwards too until end turn)
 
     def leaveJail(self, fine):
         self.doublesRolled = 0
@@ -70,7 +70,7 @@ class Player:
     # return unmortgaged properties that aren't street, or if they are a street, they have no houses
     def getUnmortgagedProperties(self): return list(filter(lambda prop: (prop.isMortgaged == False and (not isinstance(prop, Street) or (isinstance(prop, Street) and prop.numberOfHouses == 0))), self.properties))
 
-    def getPropertiesWithHouses(self): return list(filter(lambda prop: (isinstance(prop, Street) and prop.numberOfHouses != 0), self.properties))
+    def getPropertiesWithHouses(self): return list(filter(lambda prop: (isinstance(prop, Street) and prop.numberOfHouses != 0 and prop.colourSetOwned and all(prop.numberOfHouses <= street.numberOfHouses for street in Street.colourSets[prop.colour])), self.properties))
 
     def canAfford(self, payment): return self.money - payment >= 0
 
