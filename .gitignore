@@ -1,4 +1,5 @@
 .DS_Store
-.vscode/settings.json
+.vscode/
 boards/default.numbers
 __pycache__/
+*.pyc
