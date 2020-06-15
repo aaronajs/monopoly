@@ -32,35 +32,19 @@ class Game:
         while self.activePlayers > 1:
             player = self.players[self.turn]
             if not self.doubleRolled: self.turn = self.turn + 1 if self.turn < self.activePlayers - 1 else 0
-            decision = "r"
-            query = player.token + "\'s turn: (m)ortgage, (u)nmortgage, sell (p)roperty, buy (h)ouse, (s)ell house, (o)ffer, declare (b)ankruptcy, (r)oll dice?"
-            options = ["m", "u", "p", "h", "s", "o", "r"]
-
+            rolled = False
             while True:
-                decision = self.controller.makeDecision(query, options)
-                if decision == "m": 
-                    unmortgaged = player.getUnmortgagedProperties()
-                    if unmortgaged: self.playerMortgagesProperty(player, unmortgaged)
-                    else: print("there are no properties " + player.token + " can mortgage")
-                elif decision == "u":
-                    mortgaged = list(filter(lambda prop: (prop.isMortgaged == True), player.properties))
-                    if mortgaged: self.playerMortgagesProperty(player, mortgaged)
-                    else: print("there are no properties " + player.token + " can unmortgage")
-                elif decision == "p": 
-                    if player.properties: self.playerSellsProperty(player)
-                    else: print("there are no properties " + player.token + " can sell")
+                decision = self.controller.choosePlayerAction(player, rolled)
+                if decision == "m": self.playerMortgagesProperty(player)
+                elif decision == "u": self.playerUnmortgagesProperty(player)
+                elif decision == "p": self.playerSellsProperty(player)
                 elif decision == "h": self.playerBuysHouse(player)
-                elif decision == "s": 
-                     propsWithHouses = player.getPropertiesWithHouses()
-                     if propsWithHouses: self.playerSellsHouse(player, propsWithHouses)
-                     else: print("there are no properties " + player.token + " can sell houses on")
+                elif decision == "s": self.playerSellsHouse(player)
                 elif decision == "o": print("make offer") #TODO: offer functionality
                 elif decision == "b": self.playerGoesBankrupt(player)
                 elif decision == "r": 
                     self.movePlayer(player)
-                    query = player.token + "\'s turn: (m)ortgage, (u)nmortgage, sell (p)roperty, buy (h)ouse, (s)ell house, (o)ffer, declare (b)ankruptcy, (e)nd turn?"
-                    options.remove("r")
-                    options.append("e")
+                    rolled = True
                 elif decision == "e": break  
         print("Winner: " + self.players[0])
     ###
@@ -199,7 +183,8 @@ class Game:
             player.buyHouse(street)
         else: print("there are no properties " + player.token + " can build houses on")
 
-    def playerSellsHouse(self, player, props): # add sell at colour set level
+    def playerSellsHouse(self, player): # add sell at colour set level
+        props = player.getPropertiesWithHouses()
         options = [str(index) for index in range(len(props))]
         for index in options:
             prop = props[int(index)]
@@ -211,14 +196,16 @@ class Game:
     ###
 
     ### NOTE: deals with mortgaging
-    def playerMortgagesProperty(self, player, props):
+    def playerMortgagesProperty(self, player):
+        props = player.getUnmortgagedProperties()
         options = [str(index) for index in range(len(props))]
         for index in options: print(str(index) + ": " + str(props[int(index)]))
         query = "Which property to mortgage? (enter number)"
         decision = int(self.controller.makeDecision(query, options))
         player.mortgageProperty(player.properties[decision])
 
-    def playerUnmortgagesProperty(self, player, props):
+    def playerUnmortgagesProperty(self, player):
+        props = list(filter(lambda prop: (prop.isMortgaged == True), player.properties))
         options = [str(index) for index in range(len(props))]
         for index in options: print(str(index) + ": " + str(props[int(index)]))
         query = "Which property to unmortgage? (enter number)"
@@ -265,20 +252,12 @@ class Game:
         if not player.properties: self.playerGoesBankrupt(player, owner)
         else: 
             query = player.token + ": declare (b)ankruptcy, sell a (p)roperty"
-            options = ["p", "b"]
-            propsWithHouses = player.getPropertiesWithHouses() # unmortgaged, have houses/hotel
-            if propsWithHouses: 
-                options.append("h")
-                query += ", sell a (h)ouse"
-            unmortgaged = player.getUnmortgagedProperties() # can be mortgaged, have no houses
-            if unmortgaged: 
-                options.append("m")
-                query += ", (m)ortgage"
+            options = ["p", "b", "h", "m"]
             decision = self.controller.makeDecision(query, options)
             if decision == "p": self.playerSellsProperty(player)
             elif decision == "b": self.playerGoesBankrupt(player, owner)
-            elif decision == "m": self.playerMortgagesProperty(player, unmortgaged)
-            elif decision == "h": self.playerSellsHouse(player, propsWithHouses)
+            elif decision == "m": self.playerMortgagesProperty(player)
+            elif decision == "h": self.playerSellsHouse(player)
 
     def playerGoesBankrupt(self, player, owner=None):
         player.isBankrupt(owner) #TODO what to do when owner is bank
@@ -286,6 +265,7 @@ class Game:
         self.activePlayers -= 1
         # TODO: check if destroy player object?
         print(player.token + " is bankrupt!")
+        # TODO: default end turn
     ###
     
 if __name__ == "__main__":

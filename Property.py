@@ -12,6 +12,8 @@ class Property:
     def __str__(self): 
         # return self.name + " " + str(self.value) + " " + str(self.mortgage)+ " " + str(self.rent) + " " + self.owner
         return self.name
+
+    def canMortgage(self):return not self.isMortgaged
     
 class Street(Property):
 
@@ -26,6 +28,12 @@ class Street(Property):
         self.colourSetOwned = False
         if colour in Street.colourSets: Street.colourSets[colour].append(self)
         else: Street.colourSets[colour] = [self]
+
+    def canMortgage(self): return not self.isMortgaged and self.numberOfHouses == 0
+
+    def canSellHouse(self): return self.numberOfHouses != 0 and all(self.numberOfHouses >= prop.numberOfHouses for prop in Street.colourSets[self.colour]) 
+
+    def canBuyHouse(self): return self.colourSetOwned and self.numberOfHouses < 5 and all(self.numberOfHouses <= prop.numberOfHouses for prop in Street.colourSets[self.colour])
 
 # could combine into other, add type param?
 class Utility(Property):
