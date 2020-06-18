@@ -79,8 +79,10 @@ class Player:
 
     # TODO: update to use methods in property class
     # return unmortgaged properties that aren't a street, or if they are a street, they have no houses
-    def getUnmortgagedProperties(self): return list(filter(lambda prop: (prop.isMortgaged == False and (not isinstance(prop, Street) or (isinstance(prop, Street) and prop.numberOfHouses == 0))), self.properties))
-    def getPropertiesWithHouses(self): return list(filter(lambda prop: (isinstance(prop, Street) and prop.numberOfHouses != 0 and prop.colourSetOwned and all(prop.numberOfHouses <= street.numberOfHouses for street in Street.colourSets[prop.colour])), self.properties))
+    def getMortgagableProperties(self): return list(filter(lambda prop: (prop.canMortgage()), self.properties))
+    def getUnmortgagableProperties(self): return list(filter(lambda prop: (prop.isMortgaged), self.properties))
+    def getSellableHouses(self): return list(filter(lambda prop: (isinstance(prop, Street) and prop.canSellHouse()), self.properties))
+    def getBuildableProperties(self): return list(filter(lambda prop: (isinstance(prop, Street) and prop.canBuyHouse()), self.properties))
 
     def canAfford(self, payment): return self.money - payment >= 0
 

@@ -35,7 +35,7 @@ class Controller:
         return price
 
     def choosePlayerAction(self, player, rolled):
-        query, options = self.updateOptions("\'s turn: make (o)ffer, declare (b)ankruptcy")
+        query, options = self.updateOptions(player.token + "\'s turn: make (o)ffer, declare (b)ankruptcy")
         query = player.token + "\'s turn: make (o)ffer, declare (b)ankruptcy"
         options = ["o", "b"]
         if player.properties: 
@@ -48,15 +48,30 @@ class Controller:
         else: query, options = self.updateOptions(", (r)oll dice", query, options)
         return self.makeDecision(query, options)
 
-    def chooseJailAction(self, player):
-        if player.doublesRolled == 1: return "l"
-        else: 
-            player.timeInJail += 1
-            if player.timeInJail == 3: return "p"
-            else: 
-                query, options = self.updateOptions("(w)ait for next turn")
-                if player.canAfford(50): query, options = self.updateOptions(", (p)ay 50 to leave", query, options)
-                if player.getOutOfJailFreeCards > 0: query, options = self.updateOptions(", use GO(j)F card", query, options)
+    def chooseJailAction(self, player): # TODO: TEST
+        query, options = self.updateOptions(player.token + "'s choice: (w)ait for next turn")
+        if player.canAfford(50): query, options = self.updateOptions(", (p)ay 50 to leave", query, options)
+        if player.getOutOfJailFreeCards > 0: query, options = self.updateOptions(", use GO(j)F card", query, options)
         return self.makeDecision(query, options)
+    
+    def buyOrAuction(self, player, prop):
+        # player can buy it, or get bank to auction property
+        query, options = self.updateOptions(player.token + "'s choice: (a)uction")
+        if player.canAfford(prop.value): query, options = self.updateOptions(", (b)uy property", query, options)
+        return self.makeDecision(query, options)
+    
+    def chooseProperty(self, props, query, details):
+        options = [str(index) for index in range(len(props))]
+        for index in options:
+            prop = props[int(index)]
+            print(index + ": " + str(prop) + "," + str(getattr(prop, details))) #adjust on action
+        decision = self.makeDecision(query, options)
+        return props[int(decision)]
+        
+    def choosePropertyToMortgage(self, props): self.chooseProperty(props, "Which property to mortgage?", "mortgage")
+    def choosePropertyToUnmortgage(self, props): self.chooseProperty(props, "Which property to unmortgage?", "mortgage*1.1")
+    def choosePropertyToBuyHouse(self, props): self.chooseProperty(props, "Which property do you want to build a house on?", "houseCost")
+    def choosePropertyToSellHouse(self, props): self.chooseProperty(props, "From which property do you want to sell a house?", "houseCost*0.5")
+    #TODO: add custom methods with queries and details
 
-    #TODO: get out of jail, buy property, select property, player needs money, offer
+    #TODO: select property, sell property, player needs money, offer
