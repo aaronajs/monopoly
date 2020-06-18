@@ -46,16 +46,16 @@ class Game:
                     self.movePlayer(player)
                     rolled = True
                 elif decision == "e": break  
-        print("Winner: " + self.players[0])
+                print(str(player)+"\n")
+        print("Winner: " + str(self.players[0]))
     ###
 
     def rollDice(self): return [random.randint(1,6),random.randint(1,6)]
 
     ### NOTE: controls player position around board
-    def movePlayer(self, player): # TODO: finishing moving protocols
+    def movePlayer(self, player):
         dice = self.rollDice()
         moveSpaces = sum(dice)
-
         if dice[0] == dice[1]: 
             player.doublesRolled += 1
             print(player.token + ": double rolled")
@@ -63,15 +63,14 @@ class Game:
         else: 
             player.doublesRolled = 0
             self.doubleRolled = False
-
         if player.timeInJail == -1: # player not in jail
             if player.doublesRolled == 3: # got to jail for 3 doubles in a row
                 self.sendPlayerToJail(player)
                 print(player.token + " rolled 3 doubles, goes to jail")
             else: 
                 self.newPlayerPosition(player, moveSpaces)
-        else: self.tryToLeaveJail(player, moveSpaces)
-        print(str(player)+"\n")
+        else: 
+            self.tryToLeaveJail(player, moveSpaces)
 
     def newPlayerPosition(self, player, moveSpaces):
         # controls the outcome of where the player lands
@@ -132,39 +131,25 @@ class Game:
     ###
 
     ### NOTE: controls jail movement
-    def sendPlayerToJail(self, player):
-        player.timeInJail = 0
-        player.position = 10
-        player.doublesRolled = 0
+    def sendPlayerToJail(self, player): player.goToJail()
 
     def playerLeavesJail(self, player, moveSpaces, fine=0):
+        self.doubleRolled = False # player can't double roll
         player.leaveJail(fine)
         self.newPlayerPosition(player, moveSpaces)
         print(player.token + " leaves jail")
     
-    def tryToLeaveJail(self, player, moveSpaces):
-        if player.doublesRolled == 1: 
+    def tryToLeaveJail(self, player, moveSpaces): #TODO: adjust so actions happen in the right order.
+        decision = self.controller.chooseJailAction(player)
+        if decision == "p": 
+            while player in self.players and not player.canAfford(50): 
+                self.playerNeedsMoney(player)
+            if player in self.players: self.playerLeavesJail(player, moveSpaces, 50)
+        elif decision == "j": 
             self.playerLeavesJail(player, moveSpaces)
-            print(player.token + "rolled a double")
-        else: 
-            player.timeInJail += 1
-            if player.timeInJail == 3: 
-                while player in self.players and not player.canAfford(50): 
-                    self.playerNeedsMoney(player)
-                if player in self.players: self.playerLeavesJail(player, moveSpaces, 50)
-            else: # in jail for less than 3 turns; give options based on GOJF card
-                if player.getOutOfJailFreeCards > 0:
-                    query = "(p)ay 50 or use GO(j)F card, or (w)ait for next turn?"
-                    options = ["w", "p", "j"]
-                else:
-                    query = "(p)ay 50 or (w)ait for next turn??"
-                    options = ["w", "p"]
-                decision = self.controller.makeDecision(query, options)
-                if decision == "p": 
-                    while player in self.players and not player.canAfford(50): 
-                        self.playerNeedsMoney(player)
-                    if player in self.players: self.playerLeavesJail(player, moveSpaces, 50)
-                elif decision == "j": self.playerLeavesJail(player, moveSpaces)
+            player.getOutOfJailFreeCards -= 1
+        elif decision == "l": self.playerLeavesJail(player, moveSpaces)
+        # else try again later
     ###
 
     ### NOTE: deals with housing
@@ -188,7 +173,7 @@ class Game:
         options = [str(index) for index in range(len(props))]
         for index in options:
             prop = props[int(index)]
-            print(index + ": " + str(prop) + "," + str(prop.houseCost*0.5))
+            print(index + ": " + str(prop) + "," + str(int(prop.houseCost*0.5)))
         query = "From which property do you want to sell a house?"
         decision = self.controller.makeDecision(query, options)
         street = props[int(decision)]
@@ -211,7 +196,7 @@ class Game:
         query = "Which property to unmortgage? (enter number)"
         decision = int(self.controller.makeDecision(query, options))
         prop = props[decision]
-        while player in self.players and not player.canAfford(prop.mortgage*1.1): 
+        while player in self.players and not player.canAfford(int(prop.mortgage*1.1)): 
             self.playerNeedsMoney(player)
         player.unmortgageProperty(prop)
     ###

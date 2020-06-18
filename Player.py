@@ -21,6 +21,11 @@ class Player:
     #     movePlayer(self) # ready to roll dice and move
     #     # TODO: (add functionality to do other stuff afterwards too until end turn)
 
+    def goToJail(self):
+        self.doublesRolled = 0
+        self.timeInJail = 0
+        self.position = 10
+
     def leaveJail(self, fine):
         self.doublesRolled = 0
         self.money -= fine
@@ -57,7 +62,7 @@ class Player:
 
     def unmortgageProperty(self, prop):
         prop.isMortgaged = True
-        self.money -= prop.mortgage * 1.1 # 10% extra
+        self.money -= int(prop.mortgage * 1.1) # 10% extra
 
     def buyHouse(self, street):
         street.numberOfHouses += 1
@@ -65,18 +70,17 @@ class Player:
 
     def sellHouse(self, street):
         street.numberOfHouses -= 1
-        self.money += street.houseCost*0.5
+        self.money += int(street.houseCost*0.5)
 
     def canMortgageProperties(self): return next((prop for prop in self.properties if prop.canMortgage()), None)
     def canUnmortgageProperties(self): return next((prop for prop in self.properties if prop.isMortgaged), None)
     def canSellHouse(self): return next((prop for prop in self.properties if isinstance(prop, Street) and prop.canSellHouse()), None)
     def canBuyHouse(self): return next((prop for prop in self.properties if isinstance(prop, Street) and prop.canBuyHouse()), None)
 
+    # TODO: update to use methods in property class
     # return unmortgaged properties that aren't a street, or if they are a street, they have no houses
     def getUnmortgagedProperties(self): return list(filter(lambda prop: (prop.isMortgaged == False and (not isinstance(prop, Street) or (isinstance(prop, Street) and prop.numberOfHouses == 0))), self.properties))
-
     def getPropertiesWithHouses(self): return list(filter(lambda prop: (isinstance(prop, Street) and prop.numberOfHouses != 0 and prop.colourSetOwned and all(prop.numberOfHouses <= street.numberOfHouses for street in Street.colourSets[prop.colour])), self.properties))
-
 
     def canAfford(self, payment): return self.money - payment >= 0
 
