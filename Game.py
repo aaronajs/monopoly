@@ -187,7 +187,7 @@ class Game:
     def auctionProperty(self, prop):
          print("auction property " + str(prop))
 
-    ### NOTE: deals with insufficient finances
+    ### NOTE: deals with finances and offers
     def playerNeedsMoney(self, player, owner=None):
         print(player.token + " has " + str(player.money))
         if not player.properties: self.playerGoesBankrupt(player, owner)
@@ -205,6 +205,26 @@ class Game:
         # TODO: check if destroy player object?
         print(player.token + " is bankrupt!")
         # TODO: default end turn
+
+    def playerMakesOffer(self, player):
+        # EXTRA: counter, switches: adjusts existing offer?
+        target = self.controller.choosePlayer(list(filter(lambda other: (other != player), self.players)))
+        propsToOffer = self.controller.chooseMultipleProperties(player.getSellableProperties()) if player.properties else None
+        moneyToOffer = int(self.controller.choosePrice("what money to give " + str(target) + "?"))
+        propsToTake = self.controller.chooseMultipleProperties(target.getSellableProperties()) if target.properties else None
+        moneyToTake = 0 if moneyToOffer != 0 else int(self.controller.choosePrice("what money to take from" + str(target) + "?"))
+        print("\n"+ player.token + "offers to " + target.token + ":")
+        for prop in propsToOffer: print(prop)
+        if moneyToOffer: print(moneyToOffer)
+        print("in exchange for:")
+        for prop in propsToTake: print(prop)
+        if moneyToTake: print(moneyToTake)
+        targetDecision = self.controller.offerDecision(target)
+        if targetDecision == "a": print("Accepted")
+            # exchange properties and money
+        elif targetDecision == "r": print("Rejected")
+
+
     ###
     
 if __name__ == "__main__":

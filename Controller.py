@@ -71,6 +71,27 @@ class Controller:
         decision = self.makeDecision(query, options)
         return props[int(decision)]
 
+    def chooseMultipleProperties(self, props):
+        query, options = self.updateOptions("Which properties to offer? (a)ll, (n)one; (d)one choosing")
+        options += [str(index) for index in range(len(props))]
+        for index in options:
+            prop = props[int(index)]
+            print(index + ": " + str(prop))
+        chosenProperties = []
+        while True:
+            selection = self.makeDecision(query, options)
+            if selection == "a": chosenProperties = props; break
+            elif selection == "n": chosenProperties = None; break
+            elif selection == "d": break
+            else:
+                chosenProperties.append(props[int(index)])
+                props.remove(index) #TODO: test
+        return chosenProperties
+
+    def offerDecision(self, player):
+        query, options = self.updateOptions(player.token + ": what is your decision? (a)ccept or (r)eject")
+        return self.makeDecision(query, options)
+
     def choosePlayer(self, others):
         options = [str(index) for index in range(len(others))]
         for index in options:
