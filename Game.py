@@ -76,7 +76,7 @@ class Game:
         # controls the outcome of where the player lands
         newPosition = player.position + moveSpaces
 
-        # TODO: simplify, organise by instances
+        # TODO: simplify, organise by instances ----- check: Action: go to jail, taxes, cards; Properties
 
         # jail, passing go
         if newPosition == 30: # player lands on go to jail, goes to jail, doesn't pass go/collects 200
@@ -105,28 +105,19 @@ class Game:
                 if owner is None: # property is unowned
                     decision = self.controller.buyOrAuction(player, prop)
                     if decision == "b": self.playerBuysProperty(player, prop)
-                    else: print("auction property") # TODO: auction by default
+                    else: self.auctionProperty(prop)
                 else: # property is owned by a player
                     print("owned by", owner.token)
                     if owner is not player and not prop.isMortgaged:
-                        if isinstance(prop, Station): rentOwed = prop.rent * 2^(owner.stationsOwned - 1) 
-                        elif isinstance(prop, Utility): rentOwed = moveSpaces * (3^owner.utilitiesOwned +1)
-                        elif isinstance(prop, Street): 
-                            rentOwed = prop.rent[prop.numberOfHouses] 
-                            if prop.colourSetOwned and prop.numberOfHouses == 0: rentOwed *= 2
-
+                        rentOwed = prop.calculateRent()
                         while player in self.players and not player.canAfford(rentOwed):
                             self.playerNeedsMoney(player, owner)
-                        if player in self.players:
-                            player.money -= rentOwed
-                            owner.money += rentOwed
-                            print(player.token + " pays rent (" + str(rentOwed) + ") to " + owner.token)
+                        if player in self.players: player.payRent(owner, rentOwed)
 
             # elif isinstance(prop, Card): print (player.token + " landed on chance or community chest")
     ###
 
     ### NOTE: controls jail movement; 
-    # TODO: Simplify
     def sendPlayerToJail(self, player): player.goToJail()
 
     def playerLeavesJail(self, player, moveSpaces, fine=0):
@@ -156,23 +147,23 @@ class Game:
 
     ### NOTE: deals with housing; TODO: test filters
     def playerBuysHouse(self, player): # add buy at colour set level
-        street = self.controller.choosePropertyToBuyHouse(player.getBuildableProperties())
+        street = self.controller.chooseProperty(player.getBuildableProperties(), "buyHouse")
         while player in self.players and not player.canAfford(street.houseCost): 
             self.playerNeedsMoney(player)
         if player in self.players: player.buyHouse(street)
 
     def playerSellsHouse(self, player): # add sell at colour set level
-        street = self.controller.choosePropertyToSellHouse(player.getSellableHouses())
+        street = self.controller.chooseProperty(player.getSellableHouses(), "sellHouse")
         player.sellHouse(street)
     ###
 
     ### NOTE: deals with mortgaging
     def playerMortgagesProperty(self, player):
-        prop = self.controller.choosePropertyToMortgage(player.getMortgagableProperties())
+        prop = self.controller.chooseProperty(player.getMortgagableProperties(), "mortgage")
         player.mortgageProperty(prop)
 
     def playerUnmortgagesProperty(self, player):
-        prop = self.controller.choosePropertyToUnmortgage(player.getUnmortgagableProperties())
+        prop = self.controller.chooseProperty(player.getUnmortgagableProperties(), "unmortgage")
         while player in self.players and not player.canAfford(int(prop.mortgage*1.1)): 
             self.playerNeedsMoney(player)
         player.unmortgageProperty(prop)
@@ -185,36 +176,23 @@ class Game:
             self.playerNeedsMoney(player)
         if player in self.players: player.buyProperty(prop)
 
-    def playerSellsProperty(self, player): #TODO: change to check for unsold houses before this?
-        options = [str(index) for index in range(len(player.properties))]
-        for index in options: 
-            print(index + ": " + str(player.properties[int(index)]))
-        query = "Which property to sell? (enter number)"
-        decision = self.controller.makeDecision(query, options)
-        prop = player.properties[int(decision)]
+    def playerSellsProperty(self, player):
+        prop = self.controller.chooseProperty(player.getSellableProperties(), "sellProp")
         # TODO: add option to sell buildings straight away
-        if isinstance(prop, Street) and prop.numberOfHouses != 0: print("sell houses first") 
-        else: # sell property to another player
-            buyers = [buyer for buyer in self.players if buyer != player]
-            options = [str(index) for index in range(len(buyers))]
-            for index in options: print(str(index) + ": " + str(buyers[int(index)]))
-            # options = [buyer.token for buyer in self.players if buyer != player]
-            query = "Sell property to another player: (enter number)" # + str(options)
-            decision = buyers[int(self.controller.makeDecision(query, options))]
-            # TODO: players must agree on a price before the transaction goes through
-            # for now leave as agree outside game
-            # ensure that it's within range of BOTH players of the game
-            price = int(self.controller.choosePrice("what price to sell to " + str(decision))) # BUG: infinite loop?
-            player.sellProperty(prop, decision, price)
+        buyer = self.controller.choosePlayer(list(filter(lambda other: (other != player), self.players)))
+        # TODO: players must agree on a price before the transaction goes through
+        price = int(self.controller.choosePrice("what price to sell to " + str(buyer) + "?"))
+        player.sellProperty(prop, buyer, price)
+
+    def auctionProperty(self, prop):
+         print("auction property " + str(prop))
 
     ### NOTE: deals with insufficient finances
     def playerNeedsMoney(self, player, owner=None):
         print(player.token + " has " + str(player.money))
         if not player.properties: self.playerGoesBankrupt(player, owner)
         else: 
-            query = player.token + ": declare (b)ankruptcy, sell a (p)roperty"
-            options = ["p", "b", "h", "m"]
-            decision = self.controller.makeDecision(query, options)
+            decision = self.controller.chooseFinancing(player)
             if decision == "p": self.playerSellsProperty(player)
             elif decision == "b": self.playerGoesBankrupt(player, owner)
             elif decision == "m": self.playerMortgagesProperty(player)

@@ -36,8 +36,6 @@ class Controller:
 
     def choosePlayerAction(self, player, rolled):
         query, options = self.updateOptions(player.token + "\'s turn: make (o)ffer, declare (b)ankruptcy")
-        query = player.token + "\'s turn: make (o)ffer, declare (b)ankruptcy"
-        options = ["o", "b"]
         if player.properties: 
             query, options = self.updateOptions(", sell (p)roperty", query, options)
             if player.canMortgageProperties(): query, options = self.updateOptions(", (m)ortgage", query, options)
@@ -54,24 +52,39 @@ class Controller:
         if player.getOutOfJailFreeCards > 0: query, options = self.updateOptions(", use GO(j)F card", query, options)
         return self.makeDecision(query, options)
     
-    def buyOrAuction(self, player, prop):
+    def buyOrAuction(self, player, prop): # TODO: let player have option to raise money, and change mind.
         # player can buy it, or get bank to auction property
         query, options = self.updateOptions(player.token + "'s choice: (a)uction")
         if player.canAfford(prop.value): query, options = self.updateOptions(", (b)uy property", query, options)
         return self.makeDecision(query, options)
-    
-    def chooseProperty(self, props, query, details):
+
+    def chooseProperty(self, props, version):
+        if version == "mortgage": query = "Which property do you want to mortgage?"
+        elif version == "unmortgage": query = "Which property do you want to unmortgage?"
+        elif version == "buyHouse": query = "Which property do you want to build a house on?"
+        elif version == "sellHouse": query = "From which property do you want to sell a house?"
+        elif version == "sellProp": query = "Which property do you want to sell?"
         options = [str(index) for index in range(len(props))]
         for index in options:
             prop = props[int(index)]
-            print(index + ": " + str(prop) + "," + str(getattr(prop, details))) #adjust on action
+            print(index + ": " + str(prop))
         decision = self.makeDecision(query, options)
         return props[int(decision)]
-        
-    def choosePropertyToMortgage(self, props): self.chooseProperty(props, "Which property to mortgage?", "mortgage")
-    def choosePropertyToUnmortgage(self, props): self.chooseProperty(props, "Which property to unmortgage?", "mortgage*1.1")
-    def choosePropertyToBuyHouse(self, props): self.chooseProperty(props, "Which property do you want to build a house on?", "houseCost")
-    def choosePropertyToSellHouse(self, props): self.chooseProperty(props, "From which property do you want to sell a house?", "houseCost*0.5")
-    #TODO: add custom methods with queries and details
 
-    #TODO: select property, sell property, player needs money, offer
+    def choosePlayer(self, others):
+        options = [str(index) for index in range(len(others))]
+        for index in options:
+            other = others[int(index)]
+            print(index + ": " + str(other))
+        decision = self.makeDecision("Which player?", options)
+        return others[int(decision)]
+
+    def chooseFinancing(self, player):
+        query, options = self.updateOptions(player.token + "\'s turn: declare (b)ankruptcy")
+        if player.properties: 
+            query, options = self.updateOptions(", sell (p)roperty", query, options) # careful with selling properties with houses
+            if player.canMortgageProperties(): query, options = self.updateOptions(", (m)ortgage", query, options)
+            if player.canSellHouse(): query, options = self.updateOptions(", (s)ell house", query, options)
+        return self.makeDecision(query, options)
+
+    #TODO: offer

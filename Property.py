@@ -14,6 +14,8 @@ class Property:
         return self.name
 
     def canMortgage(self):return not self.isMortgaged
+
+    def canSell(self): return self.owner != None
     
 class Street(Property):
 
@@ -29,7 +31,11 @@ class Street(Property):
         if colour in Street.colourSets: Street.colourSets[colour].append(self)
         else: Street.colourSets[colour] = [self]
 
+    def calculateRent(self, spaces): return self.rent[0] * 2 if self.colourSetOwned and self.numberOfHouses == 0 else self.rent[self.numberOfHouses] 
+
     def canMortgage(self): return not self.isMortgaged and self.numberOfHouses == 0
+
+    def canSell(self): return self.owner != None and self.numberOfHouses == 0
 
     def canSellHouse(self): return self.numberOfHouses != 0 and all(self.numberOfHouses >= prop.numberOfHouses for prop in Street.colourSets[self.colour]) 
 
@@ -41,8 +47,12 @@ class Utility(Property):
     def __init__(self, name, value, mortgage):
         Property.__init__(self, name, value, mortgage)
 
+    def calculateRent(self, spaces): return spaces * (3^self.owner.utilitiesOwned +1)
+
 class Station(Property):
 
     def __init__(self, name, value, mortgage, rent):
         Property.__init__(self, name, value, mortgage)
         self.rent = rent
+
+    def calculateRent(self, spaces): return self.rent * 2^(self.owner.stationsOwned - 1) 

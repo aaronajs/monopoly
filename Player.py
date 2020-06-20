@@ -15,11 +15,10 @@ class Player:
         self.doublesRolled = 0 # to track 3 doubles in a row
         self.position = 0
 
-    # def takeTurn(self, movePlayer):
-    #     # decision = self.makeDecision("what to do? ", ["roll", "build", "sell", "offer"])
-    #     # TODO: opportunity to do other stuff
-    #     movePlayer(self) # ready to roll dice and move
-    #     # TODO: (add functionality to do other stuff afterwards too until end turn)
+    def payRent(self, owner, rent):
+        self.money -= rent
+        owner.money += rent
+        print(self.token + " pays rent (" + str(rent) + ") to " + owner.token)
 
     def goToJail(self):
         self.doublesRolled = 0
@@ -83,6 +82,7 @@ class Player:
     def getUnmortgagableProperties(self): return list(filter(lambda prop: (prop.isMortgaged), self.properties))
     def getSellableHouses(self): return list(filter(lambda prop: (isinstance(prop, Street) and prop.canSellHouse()), self.properties))
     def getBuildableProperties(self): return list(filter(lambda prop: (isinstance(prop, Street) and prop.canBuyHouse()), self.properties))
+    def getSellableProperties(self): return list(filter(lambda prop: (prop.canSell()), self.properties))
 
     def canAfford(self, payment): return self.money - payment >= 0
 
