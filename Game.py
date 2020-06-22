@@ -33,7 +33,7 @@ class Game:
             player = self.players[self.turn]
             if not self.doubleRolled: self.turn = self.turn + 1 if self.turn < self.activePlayers - 1 else 0
             rolled = False
-            while True:
+            while player in self.players:
                 decision = self.controller.choosePlayerAction(player, rolled)
                 if decision == "m": self.playerMortgagesProperty(player)
                 elif decision == "u": self.playerUnmortgagesProperty(player)
@@ -112,7 +112,7 @@ class Game:
                         rentOwed = prop.calculateRent()
                         while player in self.players and not player.canAfford(rentOwed):
                             self.playerNeedsMoney(player, owner)
-                        if player in self.players: player.payRent(owner, rentOwed)
+                        if player in self.players: player.payMoney(owner, rentOwed)
 
             # elif isinstance(prop, Card): print (player.token + " landed on chance or community chest")
     ###
@@ -204,10 +204,8 @@ class Game:
         self.activePlayers -= 1
         # TODO: check if destroy player object?
         print(player.token + " is bankrupt!")
-        # TODO: default end turn
 
     def playerMakesOffer(self, player):
-        # EXTRA: counter, switches: adjusts existing offer?
         target = self.controller.choosePlayer(list(filter(lambda other: (other != player), self.players)))
         propsToOffer = self.controller.chooseMultipleProperties(player.getSellableProperties()) if player.properties else None
         moneyToOffer = int(self.controller.choosePrice("what money to give " + str(target) + "?"))
@@ -215,16 +213,15 @@ class Game:
         moneyToTake = 0 if moneyToOffer != 0 else int(self.controller.choosePrice("what money to take from" + str(target) + "?"))
         print("\n"+ player.token + "offers to " + target.token + ":")
         for prop in propsToOffer: print(prop)
-        if moneyToOffer: print(moneyToOffer)
+        if moneyToOffer: print("money: " + moneyToOffer)
         print("in exchange for:")
         for prop in propsToTake: print(prop)
-        if moneyToTake: print(moneyToTake)
+        if moneyToTake: print("money: " + moneyToTake)
         targetDecision = self.controller.offerDecision(target)
-        if targetDecision == "a": print("Accepted")
-            # exchange properties and money
+        if targetDecision == "a": 
+            print("Accepted")
+            player.exchange(target, propsToOffer, moneyToOffer, propsToTake, moneyToTake)
         elif targetDecision == "r": print("Rejected")
-
-
     ###
     
 if __name__ == "__main__":

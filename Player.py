@@ -15,10 +15,10 @@ class Player:
         self.doublesRolled = 0 # to track 3 doubles in a row
         self.position = 0
 
-    def payRent(self, owner, rent):
-        self.money -= rent
-        owner.money += rent
-        print(self.token + " pays rent (" + str(rent) + ") to " + owner.token)
+    def payMoney(self, other, money):
+        self.money -= money
+        other.money += money
+        print(self.token + " pays (" + str(money) + ") to " + other.token)
 
     def goToJail(self):
         self.doublesRolled = 0
@@ -37,11 +37,23 @@ class Player:
         if isinstance(prop, Station): self.stationsOwned += 1
         if isinstance(prop, Utility): self.utilitiesOwned += 1
         # check if colour set
-        if isinstance(prop, Street):
-            colourSet = Street.colourSets[prop.colour]
-            if all(street.owner == self for street in colourSet):
-                for street in colourSet: street.colourSetOwned = True
-                print(self.token + " owns the colour set " + prop.colour)
+        if isinstance(prop, Street): self.checkIfColourSetOwned(prop)
+
+    def exchange(self, other, propsToOffer, moneyToOffer, propsToTake, moneyToTake):
+        for prop in propsToOffer:
+            self.properties.remove(prop)
+            other.properties.append(prop)
+        for prop in propsToTake:
+            self.properties.append(prop)
+            other.properties.remove(prop)
+        if moneyToOffer: self.payMoney(other, moneyToOffer)
+        elif moneyToTake: other.payMoney(self, moneyToTake)
+
+    def checkIfColourSetOwned(self, prop):
+        colourSet = Street.colourSets[prop.colour]
+        if all(street.owner == self for street in colourSet):
+            for street in colourSet: street.colourSetOwned = True
+            print(self.token + " owns the colour set " + prop.colour)
 
     def sellProperty(self, prop, other, price): #TODO: check if removing a property from colour set
         self.properties.remove(prop)
