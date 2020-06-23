@@ -101,3 +101,8 @@ class Chance(CardDeck):
         CardDeck.__init__(self, name, {})
 
 if __name__ == "__main__":
+    cards = CommunityChest("Community Chest")
+    x = 0
+    while x < 30:
+        x += 1
+        print(cards.updateCardDecks())
