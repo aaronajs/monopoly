@@ -1,6 +1,6 @@
 import random
 from Player import Player
-from Action import Card
+from Action import CardDeck
 from Property import Property, Street, Station, Utility 
 from BoardBuilder import BoardBuilder
 from Controller import Controller
@@ -112,7 +112,8 @@ class Game:
                             self.playerNeedsMoney(player, owner)
                         if player in self.players: player.payMoney(owner, rentOwed)
 
-            # elif isinstance(prop, Card): print (player.token + " landed on chance or community chest")
+            elif isinstance(prop, CardDeck): 
+                print (player.token + " landed on card")
     ###
 
     ### NOTE: controls jail movement; 
@@ -170,14 +171,14 @@ class Game:
     ### deals with buying and selling property
     def playerBuysProperty(self, player, prop):
         while player in self.players and not player.canAfford(prop.value):
-            print(player.token + " can't afford " + prop.name + "; it costs " + str(prop.value))
+            print(player.token + " can't afford " + prop.name + "; it costs £" + str(prop.value))
             self.playerNeedsMoney(player)
         if player in self.players: player.buyProperty(prop)
 
     def playerSellsProperty(self, player):
         prop = self.controller.chooseProperty(player.getSellableProperties(), "sellProp")
         buyer = self.controller.choosePlayer(list(filter(lambda other: (other != player), self.players)))
-        price = int(self.controller.choosePrice("what price to sell to " + str(buyer) + "?"))
+        price = int(self.controller.choosePrice("what price to sell to " + str(buyer) + "?: £"))
         player.sellProperty(prop, buyer, price)
 
     def auctionProperty(self, prop):
@@ -203,16 +204,16 @@ class Game:
     def playerMakesOffer(self, player):
         target = self.controller.choosePlayer(list(filter(lambda other: (other != player), self.players)))
         propsToOffer = self.controller.chooseMultipleProperties(player.getSellableProperties()) if player.properties else None
-        moneyToOffer = int(self.controller.choosePrice("what money to give " + str(target) + "?"))
+        moneyToOffer = int(self.controller.choosePrice("what money to give " + str(target) + "?: £"))
         propsToTake = self.controller.chooseMultipleProperties(target.getSellableProperties()) if target.properties else None
-        moneyToTake = 0 if moneyToOffer != 0 else int(self.controller.choosePrice("what money to take from " + str(target) + "?"))
+        moneyToTake = 0 if moneyToOffer != 0 else int(self.controller.choosePrice("what money to take from " + str(target) + "?: £"))
         
         print("\n"+ player.token + "offers to " + target.token + ":")
         for prop in propsToOffer: print(prop)
-        if moneyToOffer: print("money: " + str(moneyToOffer))
+        if moneyToOffer: print("£" + str(moneyToOffer))
         print("\nin exchange for:")
         for prop in propsToTake: print(prop)
-        if moneyToTake: print("money: " + str(moneyToTake))
+        if moneyToTake: print("£" + str(moneyToTake))
         
         targetDecision = self.controller.offerDecision(target)
         if targetDecision == "a": 

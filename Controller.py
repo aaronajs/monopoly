@@ -47,7 +47,7 @@ class Controller:
 
     def chooseJailAction(self, player): # TODO: TEST
         query, options = self.updateOptions(player.token + "'s choice: (w)ait for next turn", "", [])
-        if player.canAfford(50): query, options = self.updateOptions(", (p)ay 50 to leave", query, options)
+        if player.canAfford(50): query, options = self.updateOptions(", (p)ay £50 to leave", query, options)
         if player.getOutOfJailFreeCards > 0: query, options = self.updateOptions(", use GO(j)F card", query, options)
         return self.makeDecision(query, options)
     
