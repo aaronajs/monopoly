@@ -40,7 +40,7 @@ class Game:
                 elif decision == "p": self.playerSellsProperty(player)
                 elif decision == "h": self.playerBuysHouse(player)
                 elif decision == "s": self.playerSellsHouse(player)
-                elif decision == "o": print("make offer") #TODO: offer functionality
+                elif decision == "o": self.playerMakesOffer(player)
                 elif decision == "b": self.playerGoesBankrupt(player)
                 elif decision == "r": 
                     self.movePlayer(player)
@@ -75,8 +75,6 @@ class Game:
     def newPlayerPosition(self, player, moveSpaces):
         # controls the outcome of where the player lands
         newPosition = player.position + moveSpaces
-
-        # TODO: simplify, organise by instances ----- check: Action: go to jail, taxes, cards; Properties
 
         # jail, passing go
         if newPosition == 30: # player lands on go to jail, goes to jail, doesn't pass go/collects 200
@@ -131,7 +129,7 @@ class Game:
             self.playerNeedsMoney(player)
         if player in self.players: self.playerLeavesJail(player, moveSpaces, 50)
     
-    def tryToLeaveJail(self, player, moveSpaces): #TODO: adjust so actions happen in the right order.
+    def tryToLeaveJail(self, player, moveSpaces):
         if player.doublesRolled == 1: self.playerLeavesJail(player, moveSpaces)
         else: 
             player.timeInJail += 1
@@ -178,9 +176,7 @@ class Game:
 
     def playerSellsProperty(self, player):
         prop = self.controller.chooseProperty(player.getSellableProperties(), "sellProp")
-        # TODO: add option to sell buildings straight away
         buyer = self.controller.choosePlayer(list(filter(lambda other: (other != player), self.players)))
-        # TODO: players must agree on a price before the transaction goes through
         price = int(self.controller.choosePrice("what price to sell to " + str(buyer) + "?"))
         player.sellProperty(prop, buyer, price)
 
@@ -199,10 +195,9 @@ class Game:
             elif decision == "h": self.playerSellsHouse(player)
 
     def playerGoesBankrupt(self, player, owner=None):
-        player.isBankrupt(owner) #TODO what to do when owner is bank
+        player.isBankrupt(owner)
         if player in self.players: self.players.remove(player)
         self.activePlayers -= 1
-        # TODO: check if destroy player object?
         print(player.token + " is bankrupt!")
 
     def playerMakesOffer(self, player):
@@ -210,13 +205,15 @@ class Game:
         propsToOffer = self.controller.chooseMultipleProperties(player.getSellableProperties()) if player.properties else None
         moneyToOffer = int(self.controller.choosePrice("what money to give " + str(target) + "?"))
         propsToTake = self.controller.chooseMultipleProperties(target.getSellableProperties()) if target.properties else None
-        moneyToTake = 0 if moneyToOffer != 0 else int(self.controller.choosePrice("what money to take from" + str(target) + "?"))
+        moneyToTake = 0 if moneyToOffer != 0 else int(self.controller.choosePrice("what money to take from " + str(target) + "?"))
+        
         print("\n"+ player.token + "offers to " + target.token + ":")
         for prop in propsToOffer: print(prop)
-        if moneyToOffer: print("money: " + moneyToOffer)
-        print("in exchange for:")
+        if moneyToOffer: print("money: " + str(moneyToOffer))
+        print("\nin exchange for:")
         for prop in propsToTake: print(prop)
-        if moneyToTake: print("money: " + moneyToTake)
+        if moneyToTake: print("money: " + str(moneyToTake))
+        
         targetDecision = self.controller.offerDecision(target)
         if targetDecision == "a": 
             print("Accepted")

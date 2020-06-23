@@ -19,19 +19,16 @@ class Controller:
             try:
                 decision = input(query + " ")
                 if str.lower(str(decision)) == "exit": x = False; break
-                elif str.lower(str(decision)) in options: break
+                elif str.lower(str(decision)) in [str(opt) for opt in options]: break
                 else: continue
             except: print("error")
         if x == False: exit()
         return decision
     
-    # TODO: simplify
     def choosePrice(self, query):
         while True:
             price = input(query + " ")
-            try:
-                price = int(price)
-                break
+            try: price = int(price); break
             except: print("error")
         return price
 
@@ -66,41 +63,42 @@ class Controller:
         elif version == "buyHouse": query = "Which property do you want to build a house on?"
         elif version == "sellHouse": query = "From which property do you want to sell a house?"
         elif version == "sellProp": query = "Which property do you want to sell?"
-        options = [str(index) for index in range(len(props))]
+        options = [index for index in range(len(props))]
         for index in options:
-            prop = props[int(index)]
+            prop = props[index]
             print(index + ": " + str(prop))
         decision = self.makeDecision(query, options)
         return props[int(decision)]
 
     def chooseMultipleProperties(self, props):
-        query, options = self.updateOptions("Which properties to offer? (a)ll, (n)one; (d)one choosing", "", [])
-        options += [str(index) for index in range(len(props))]
-        for index in options:
-            prop = props[int(index)]
-            print(index + ": " + str(prop))
+        query, options = self.updateOptions("Which properties to select?: (a)ll, (n)one, or select numbers and (d)one choosing", "", [])
         chosenProperties = []
-        while True:
+        while props:
+            propDetails = [index for index in range(len(props))]
+            for index in propDetails:
+                print(str(index) + ": " + str(props[index]))
+                options.append(index)
             selection = self.makeDecision(query, options)
             if selection == "a": chosenProperties = props; break
-            elif selection == "n": chosenProperties = None; break
+            elif selection == "n": chosenProperties = []; break
             elif selection == "d": break
             else:
-                chosenProperties.append(props[int(index)])
-                props.remove(index) #TODO: test
+                chosen = props[index]
+                chosenProperties.append(chosen)
+                props.remove(chosen)
         return chosenProperties
 
     def offerDecision(self, player):
-        query, options = self.updateOptions(player.token + ": what is your decision? (a)ccept or (r)eject", "", [])
+        query, options = self.updateOptions("\n" + player.token + ": what is your decision? (a)ccept or (r)eject", "", [])
         return self.makeDecision(query, options)
 
     def choosePlayer(self, others):
-        options = [str(index) for index in range(len(others))]
+        options = [index for index in range(len(others))]
         for index in options:
-            other = others[int(index)]
-            print(index + ": " + str(other))
+            other = others[index]
+            print(str(index) + ": " + str(other))
         decision = self.makeDecision("Which player?", options)
-        return others[int(decision)]
+        return others[int(decision)] # Test
 
     def chooseFinancing(self, player):
         query, options = self.updateOptions(player.token + "\'s turn: declare (b)ankruptcy", "", [])
@@ -109,5 +107,3 @@ class Controller:
             if player.canMortgageProperties(): query, options = self.updateOptions(", (m)ortgage", query, options)
             if player.canSellHouse(): query, options = self.updateOptions(", (s)ell house", query, options)
         return self.makeDecision(query, options)
-
-    #TODO: offer
