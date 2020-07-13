@@ -1,6 +1,6 @@
 import random
 from Player import Player
-from Action import CardDeck
+from Action import Action, Chance, CommunityChest
 from Property import Property, Street, Station, Utility 
 from BoardBuilder import BoardBuilder
 from Controller import Controller
@@ -97,23 +97,25 @@ class Game:
                 if player in self. players: player.money -= tax
 
             # rent (utilities, stations, properties)
-            prop = board[newPosition]
-            if isinstance(prop, Property):
-                owner = prop.owner
-                if owner is None: # property is unowned
+            square = board[newPosition]
+            if isinstance(square, Property):
+                prop = square
+                if prop.owner is None: # property is unowned
                     decision = self.controller.buyOrAuction(player, prop)
                     if decision == "b": self.playerBuysProperty(player, prop)
                     else: self.auctionProperty(prop)
                 else: # property is owned by a player
-                    print("owned by", owner.token)
-                    if owner is not player and not prop.isMortgaged:
+                    print("owned by", prop.owner.token)
+                    if prop.owner is not player and not prop.isMortgaged:
                         rentOwed = prop.calculateRent()
                         while player in self.players and not player.canAfford(rentOwed):
-                            self.playerNeedsMoney(player, owner)
-                        if player in self.players: player.payMoney(owner, rentOwed)
+                            self.playerNeedsMoney(player, prop.owner)
+                        if player in self.players: player.payMoney(prop.owner, rentOwed)
 
-            elif isinstance(prop, CardDeck): 
-                print (player.token + " landed on card")
+            elif isinstance(square, Chance) or isinstance(square, CommunityChest):
+                print(player.token + " landed on card", square.__class__.__name__)
+                self.playerDrawsCard(player, square)
+
     ###
 
     ### NOTE: controls jail movement; 
@@ -140,7 +142,7 @@ class Game:
                 if decision == "p": self.playerPaysJailFine(player, moveSpaces)
                 elif decision == "j": 
                     self.playerLeavesJail(player, moveSpaces)
-                    player.getOutOfJailFreeCards -= 1
+                    player.GOJFs -= 1
                 # else try again later
     ###
 
@@ -168,7 +170,7 @@ class Game:
         player.unmortgageProperty(prop)
     ###
 
-    ### deals with buying and selling property
+    ### NOTE: deals with buying and selling property
     def playerBuysProperty(self, player, prop):
         while player in self.players and not player.canAfford(prop.value):
             print(player.token + " can't afford " + prop.name + "; it costs £" + str(prop.value))
@@ -183,6 +185,40 @@ class Game:
 
     def auctionProperty(self, prop):
          print("auction property " + str(prop))
+
+    ### NOTE: deals with the effect of cards
+    def playerDrawsCard(self, player, cardDeck):
+        info, actionDetails = cardDeck.selectCard()
+        print(info)
+        # switch case for all possible actions
+        action = actionDetails[0] # remaining items are parameters
+        if action == 0: self.giveGOJFCard(player)
+        elif action == 1: self.playerRecievesMoney(player, actionDetails[1])
+        elif action == 2: self.playerFinedMoney(player, actionDetails[1])
+        elif action == 3: self.playerMakesRepairs(player, *actionDetails[1:])
+
+    def giveGOJFCard(self, player): player.GOJFs += 1
+
+    def playerRecievesMoney(self, player, amount): player.money += amount
+
+    def playerFinedMoney(self, player, amount): 
+        while not player.canAfford(amount):
+            self.playerNeedsMoney(player)
+        if player in self.players: player.money -= amount
+
+    def playerMakesRepairs(self, player, houseAmount, hotelAmount):
+        totalAmount = 0
+        propsWithBuildings = player.getPropertiesWithBuildings()
+        if propsWithBuildings:
+            for prop in propsWithBuildings:
+                if prop.numberOfHouses == 5: totalAmount += hotelAmount
+                else: totalAmount += (prop.numberOfHouses * houseAmount)
+        else: print("No buildings to repair.")
+        while not player.canAfford(totalAmount):
+            self.playerNeedsMoney(player)
+        if player in self.players: player.money -= totalAmount 
+
+    ###
 
     ### NOTE: deals with finances and offers
     def playerNeedsMoney(self, player, owner=None):

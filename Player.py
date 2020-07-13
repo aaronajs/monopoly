@@ -8,7 +8,7 @@ class Player:
         self.token = token
         self.money = 1500 # starting amount
         self.properties = []
-        self.getOutOfJailFreeCards = 0
+        self.GOJFs = 0
         self.timeInJail = -1 # -1 is not in jail
         self.stationsOwned = 0
         self.utilitiesOwned = 0
@@ -88,20 +88,19 @@ class Player:
     def canSellHouse(self): return next((prop for prop in self.properties if isinstance(prop, Street) and prop.canSellHouse()), None)
     def canBuyHouse(self): return next((prop for prop in self.properties if isinstance(prop, Street) and prop.canBuyHouse()), None)
 
-    # TODO: update to use methods in property class
-    # return unmortgaged properties that aren't a street, or if they are a street, they have no houses
     def getMortgagableProperties(self): return list(filter(lambda prop: (prop.canMortgage()), self.properties))
     def getUnmortgagableProperties(self): return list(filter(lambda prop: (prop.isMortgaged), self.properties))
     def getSellableHouses(self): return list(filter(lambda prop: (isinstance(prop, Street) and prop.canSellHouse()), self.properties))
     def getBuildableProperties(self): return list(filter(lambda prop: (isinstance(prop, Street) and prop.canBuyHouse()), self.properties))
     def getSellableProperties(self): return list(filter(lambda prop: (prop.canSell()), self.properties))
+    def getPropertiesWithBuildings(self): return list(filter(lambda prop: (isinstance(prop, Street) and prop.numberOfHouses > 0), self.properties))
 
     def canAfford(self, payment): return self.money - payment >= 0
 
     def isBankrupt(self, other=None):
         # sell all houses and hotels at half price
         if other != None:
-            other.getOutOfJailFreeCards += self.getOutOfJailFreeCards
+            other.GOJFs += self.GOJFs
             other.stationsOwned += self.stationsOwned
             other.utilitiesOwned += self.utilitiesOwned
             other.properties += self.properties
