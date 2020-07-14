@@ -9,7 +9,7 @@ from Controller import Controller
 class Game:
 
     def __init__(self, board, controller):
-        self.players = [] # list of all players and their position
+        self.players = [] # list of all players
         self.board = board # represents the board, 40 squares
         self.turn = 0 # index of self.players
         self.activePlayers = 0
@@ -196,6 +196,11 @@ class Game:
         elif action == 1: self.playerRecievesMoney(player, actionDetails[1])
         elif action == 2: self.playerFinedMoney(player, actionDetails[1])
         elif action == 3: self.playerMakesRepairs(player, *actionDetails[1:])
+        elif action == 4: self.playerMovesTo(player, *actionDetails[1])
+        elif action == 5: self.playerMovesBackThreeSpaces(player)
+        elif action == 6: self.sendPlayerToJail(player)
+        elif action == 7: self.playerTakesChanceOrTen(player)
+        elif action == 8: self.playerBirthdayMoney(player)
 
     def giveGOJFCard(self, player): player.GOJFs += 1
 
@@ -218,6 +223,30 @@ class Game:
             self.playerNeedsMoney(player)
         if player in self.players: player.money -= totalAmount 
 
+    def playerMovesTo(self, player, direction, square):
+        if direction == 0: player.position = square # move backwards
+        else: # advance to
+            #work out spaces to move (depends if needs to pass go)
+            if player.position < square: spaces = square - player.position
+            else: spaces = 40 - (player.position - square)
+            self.newPlayerPosition(player, spaces)
+
+    def playerMovesBackThreeSpaces(self, player): self.newPlayerPosition(player, -3)
+
+    def playerTakesChanceOrTen(self, player):
+        decision = self.controller.makeDecision("Take a (c)hance or (p)ay 10?", ['c', 'p']) # move to controller
+        if decision == "p": 
+            while not player.canAfford(10):
+                self.playerNeedsMoney(player)
+            if player in self.players: player.money -= 10
+        else: self.playerDrawsCard(player, Chance)
+
+    def playerBirthdayMoney(self, player):
+        for other in list(filter(lambda other: (other != player), self.players)):
+            player.money += 10
+            while not other.canAfford(10):
+                self.playerNeedsMoney(other, player)
+            if other in self.players: other.money -= 10
     ###
 
     ### NOTE: deals with finances and offers
